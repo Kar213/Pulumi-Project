@@ -1,0 +1,3 @@
+name: local-k8s-pulumi
+runtime: python
+description: pulumi k8s deployment via github actions
