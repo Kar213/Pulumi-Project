@@ -1,4 +1,4 @@
-name: Pulumi K8s Local CI/CD
+name: Pulumi Local K8s CI/CD
 
 on:
   push:
@@ -6,27 +6,29 @@ on:
   pull_request:
 
 jobs:
-  pulumi-k8s:
+  pulumi-local-k8s:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    # 1️⃣ Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 1️⃣ Create local Kubernetes cluster INSIDE GitHub runner
+    # 2️⃣ Create local Kubernetes cluster using kind
     - name: Create kind cluster
       uses: helm/kind-action@v1
       with:
         cluster_name: pulumi-ci
 
-    - name: Verify cluster
+    - name: Verify Kubernetes cluster
       run: kubectl get nodes
 
-    # 2️⃣ Build Docker image
+    # 3️⃣ Build Docker image locally (used by kind)
     - name: Build Docker image
       run: |
         docker build -t pulumi-demo:latest app/
 
+<<<<<<< HEAD
     # # 3️⃣ Security gate using Trivy
     # - name: Trivy scan (fail on HIGH/CRITICAL)
     #   uses: aquasecurity/trivy-action@master
@@ -35,15 +37,24 @@ jobs:
     #     severity: HIGH,CRITICAL
     #     exit-code: 1
 
+=======
+>>>>>>> 835f849 (level up)
     # 4️⃣ Install Pulumi CLI
     - name: Setup Pulumi
       uses: pulumi/actions@v5
 
-    # 5️⃣ Pulumi deploys POD to local kind cluster
-    - name: Pulumi Up
-      working-directory: infra
-      run: |
-        pulumi stack select dev || pulumi stack init dev
-        pulumi up --yes
+    # 5️⃣ Pulumi login check (DEBUG + SAFETY)
+    - name: Pulumi login check
+      run: pulumi whoami
       env:
         PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+    # 6️⃣ Deploy Kubernetes resources using Pulumi
+    - name: Pulumi Deploy to Local K8s
+      working-directory: infra
+      env:
+        PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      run: |
+        pulumi stack select dev || pulumi stack init dev
+        pulumi preview
+        pulumi up --yes
