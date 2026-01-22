@@ -33,6 +33,14 @@ jobs:
       with:
         python-version: "3.10"
 
+    -  name: Trivy Image Scan
+       uses: aquasecurity/trivy-action@master
+       with:
+        image-ref: pulumi-demo:latest
+        severity: HIGH,CRITICAL
+        exit-code: 1
+
+
     # 5️⃣ Install Pulumi Python SDK (THE FIX)
     - name: Install Pulumi Python dependencies
       working-directory: infra
