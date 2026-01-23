@@ -1,7 +1,7 @@
 name: Pulumi Local K8s CI/CD
 
 on:
-  push:
+  # push:
   #   branches: [ "main" ]
   # pull_request:
   workflow_dispatch:
