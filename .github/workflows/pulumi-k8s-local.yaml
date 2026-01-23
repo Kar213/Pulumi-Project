@@ -2,19 +2,20 @@ name: Pulumi Local K8s CI/CD
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
+  #   branches: [ "main" ]
+  # pull_request:
+  workflow_dispatch:
 
 jobs:
   pulumi-local-k8s:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout
+    # 1 Checkout
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2️⃣ Create kind cluster
+    # 2️Create kind cluster
     - name: Create kind cluster
       uses: helm/kind-action@v1
       with:
@@ -23,11 +24,11 @@ jobs:
     - name: Verify cluster
       run: kubectl get nodes
 
-    # 3️⃣ Build Docker image
+    # 3️ Build Docker image
     - name: Build Docker image
       run: docker build -t pulumi-demo:latest app/
 
-    # 4️⃣ Setup Python (CRITICAL)
+    # 4️ Setup Python (CRITICAL)
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
@@ -41,18 +42,18 @@ jobs:
         exit-code: 1
 
 
-    # 5️⃣ Install Pulumi Python SDK (THE FIX)
+    # 5️ Install Pulumi Python SDK (THE FIX)
     - name: Install Pulumi Python dependencies
       working-directory: infra
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    # 6️⃣ Install Pulumi CLI
+    # 6️ Install Pulumi CLI
     - name: Setup Pulumi
       uses: pulumi/actions@v5
 
-    # 7️⃣ Pulumi deploy
+    # 7️ Pulumi deploy
     - name: Pulumi Up
       working-directory: infra
       env:
